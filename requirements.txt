@@ -1,0 +1,9 @@
+openai
+arxiv
+pypdf2
+python-dotenv
+typing
+uv
+pydantic
+fastapi
+uvicorn
