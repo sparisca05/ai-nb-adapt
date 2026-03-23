@@ -254,6 +254,12 @@ def check_vulnerabilities(owner: str, repo: str) -> str:
     Returns:
         JSON string with list of vulnerable packages and their CVE details
     """
+    def get_vuln_details(vuln_id: str) -> dict:
+        response = requests.get(f"{OSV_API}/vulns/{vuln_id}")
+        if response.status_code == 200:
+            return response.json()
+        return {"id": vuln_id, "error": "Details not found"}
+
     ecosystems = {}
 
     # Step 1: get dependencies
@@ -291,6 +297,7 @@ def check_vulnerabilities(owner: str, repo: str) -> str:
             json={"queries": queries},
             headers={"Content-Type": "application/json"}
         )
+
         osv_response.raise_for_status()
         osv_results = osv_response.json().get("results", [])
 
@@ -299,27 +306,30 @@ def check_vulnerabilities(owner: str, repo: str) -> str:
         for dep, result in zip(dependencies, osv_results):
             vulns = result.get("vulns", [])
             if vulns:
-                vulnerabilities.append({
-                    "package": dep["name"],
-                    "version": dep.get("version"),
-                    "vulnerability_count": len(vulns),
-                    "vulnerabilities": [
-                        {
-                            "id": v["id"],
-                            "summary": v.get("summary", "No summary available"),
-                            "severity": next(
-                                (s.get("score") for s in v.get("severity", []) if s.get("type") == "CVSS_V3"),
-                                "unknown"
-                            ),
-                            "fixed_in": [
-                                rng.get("fixed") for affected in v.get("affected", [])
-                                for rng in affected.get("ranges", [])
-                                if rng.get("type") == "ECOSYSTEM" and rng.get("fixed")
-                            ]
-                        }
-                        for v in vulns[:5]  # cap at 5 CVEs per package
-                    ]
-                })
+                for v in vulns:
+                    details = get_vuln_details(v["id"])
+                    v.update(details)  # enrich with details for severity, summary, etc.
+                    vulnerabilities.append({
+                        "package": dep["name"],
+                        "version": dep.get("version"),
+                        "vulnerability_count": len(vulns),
+                        "vulnerabilities": [
+                            {
+                                "id": v["id"],
+                                "summary": v.get("summary") or v.get("details", "No summary available")[:200],
+                                "severity": v.get("database_specific", {}).get("severity", "unknown"),
+                                "fixed_in": [
+                                    event["fixed"]
+                                    for affected in v.get("affected", [])
+                                    for rng in affected.get("ranges", [])
+                                    if rng.get("type") == "ECOSYSTEM"
+                                    for event in rng.get("events", [])
+                                    if "fixed" in event
+                                ]
+                            }
+                            for v in vulns[:5]  # cap at 5 CVEs per package
+                        ]
+                    })
         
         ecosystems.setdefault(
             ecosystem, {
