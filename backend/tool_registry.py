@@ -1,10 +1,13 @@
 import json
-from tools import get_file_tree, get_repo_info
+from tools import check_vulnerabilities, get_dependencies, get_file_content, get_file_tree, get_repo_info
 
 
 mapping_tool_function = {
     "get_repo_info": get_repo_info,
-    "get_file_tree": get_file_tree
+    "get_file_tree": get_file_tree,
+    "get_file_content": get_file_content,
+    "get_dependencies": get_dependencies,
+    "check_vulnerabilities": check_vulnerabilities
 }
 
 def execute_tool(tool_name, tool_args):
