@@ -4,3 +4,4 @@ typing
 pydantic
 fastapi
 uvicorn
+requests
