@@ -187,8 +187,8 @@ def get_dependencies(owner: str, repo: str) -> str:
                 pkg = json.loads(content)
                 for name, version in {**pkg.get("dependencies", {}), **pkg.get("devDependencies", {})}.items():
                     ecosystems["npm"]["dependencies"].append({"name": name, "version": version.lstrip("^~><=!")})
-            except json.JSONDecodeError:
-                return f"Could not parse {filepath}"
+            except json.JSONDecodeError as e:
+                return f"Could not parse {filepath}. Error: {str(e)}"
 
         elif "pyproject.toml" in filepath:
             ecosystems.setdefault("python", {"source_file": filepath, "dependencies": []})

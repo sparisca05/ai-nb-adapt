@@ -715,7 +715,7 @@
       <footer>Powered by OpenAI gpt-4o-mini · OSV.dev · GitHub API</footer>
     </div>
 
-    <script>
+    <script type="module">
       function generateSessionId() {
         return Date.now() * 1000 + Math.floor(Math.random() * 1000);
       }
@@ -727,6 +727,8 @@
         pendingToolFeed: null,
         lastErrorPrompt: null,
       };
+
+      const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000";
 
       const tools = [
         "get_repo_info",
@@ -1261,7 +1263,7 @@
         }, 380);
 
         try {
-          const response = await fetch("http://localhost:8000/chat", {
+          const response = await fetch(`${API_BASE_URL}/chat`, {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
