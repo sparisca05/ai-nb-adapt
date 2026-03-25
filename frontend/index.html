@@ -129,6 +129,28 @@
         transform: translateY(-1px);
       }
 
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .server-status-btn {
+        border: 1px solid rgba(63, 185, 80, 0.65);
+        background: rgba(63, 185, 80, 0.12);
+        color: #b8f7c2;
+        border-radius: 10px;
+        padding: 8px 12px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: background 180ms ease, transform 180ms ease;
+      }
+
+      .server-status-btn:hover {
+        background: rgba(63, 185, 80, 0.22);
+        transform: translateY(-1px);
+      }
+
       .tagline {
         margin: 10px 0 12px;
         color: var(--txt-muted);
@@ -670,7 +692,17 @@
             <div class="logo" aria-hidden="true">🛡</div>
             <strong>Github Repository Auditor</strong>
           </div>
-          <button class="new-audit" id="newAuditBtn" type="button">New Audit</button>
+          <div class="header-actions">
+            <a
+              class="server-status-btn"
+              id="serverStatusBtn"
+              href="#"
+              target="_blank"
+              rel="noopener noreferrer"
+              >Verificar estado del servidor</a
+            >
+            <button class="new-audit" id="newAuditBtn" type="button">New Audit</button>
+          </div>
         </div>
         <p class="tagline">
           AI-powered GitHub repository analysis. Structure, dependencies, and vulnerabilities
@@ -752,6 +784,11 @@
       const sendBtnEl = document.getElementById("sendBtn");
       const chipsEl = document.getElementById("exampleChips");
       const newAuditBtnEl = document.getElementById("newAuditBtn");
+      const serverStatusBtnEl = document.getElementById("serverStatusBtn");
+
+      if (serverStatusBtnEl instanceof HTMLAnchorElement) {
+        serverStatusBtnEl.href = API_BASE_URL;
+      }
 
       function escapeHtml(str) {
         return str
